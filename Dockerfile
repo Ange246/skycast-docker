@@ -4,35 +4,31 @@ FROM debian:latest AS build-env
 # Instalar dependencias necesarias
 RUN apt-get update && apt-get install -y curl git unzip xz-utils zip libglu1-mesa
 
-# Descargar e instalar Flutter SDK
+# Descargar e instalar Flutter SDK en una ruta global limpia
 RUN git clone https://github.com/flutter/flutter.git /usr/local/flutter
 ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
 
-# Marcar el directorio de Flutter como seguro para evitar errores de Git/Root
-RUN git config --global --add safe.directory /usr/local/flutter
-
-# Forzar a Flutter a aceptar que se ejecute como root en el contenedor
+# Forzar explícitamente a Flutter a permitir la ejecución como root
+ENV BOT=true
 ENV CHROME_EXECUTABLE=/usr/bin/chromium
 
-# Ejecutar el doctor de flutter para asegurar que todo esté en orden
-RUN flutter doctor -v
+# Marcar el directorio de Flutter como seguro para Git
+RUN git config --global --add safe.directory /usr/local/flutter
+
+# Desactivar analíticas y arrancar el doctor ignorando las advertencias de root
+RUN flutter config --no-analytics
+RUN flutter doctor -v --no-pub
 
 # Copiar el código del proyecto al contenedor
 RUN mkdir /app
 WORKDIR /app
 COPY . .
 
-# Compilar Flutter para entorno Web en modo release
-RUN flutter build web --release
+# Compilar Flutter para entorno Web en modo release de forma aislada
+RUN flutter build web --release --no-pub
 
 # Etapa 2: Servir los archivos con Nginx
 FROM nginx:alpine
-
-# Copiar los archivos compilados de la etapa anterior al directorio de Nginx
 COPY --from=build-env /app/build/web /usr/share/nginx/html
-
-# Exponer el puerto estándar de HTTP
 EXPOSE 80
-
-# Arrancar Nginx en primer plano
 CMD ["nginx", "-g", "daemon off;"]

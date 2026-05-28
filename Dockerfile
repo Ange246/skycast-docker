@@ -8,6 +8,12 @@ RUN apt-get update && apt-get install -y curl git unzip xz-utils zip libglu1-mes
 RUN git clone https://github.com/flutter/flutter.git /usr/local/flutter
 ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
 
+# Marcar el directorio de Flutter como seguro para evitar errores de Git/Root
+RUN git config --global --add safe.directory /usr/local/flutter
+
+# Forzar a Flutter a aceptar que se ejecute como root en el contenedor
+ENV CHROME_EXECUTABLE=/usr/bin/chromium
+
 # Ejecutar el doctor de flutter para asegurar que todo esté en orden
 RUN flutter doctor -v
 

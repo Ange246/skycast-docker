@@ -1,26 +1,27 @@
-import 'import:http/http.dart' as http;
 import 'dart:convert';
-import '../models/clima_model.dart';
+import 'package:http/http.dart' as http;
+import '../models/clima_dto.dart';
 
 class WeatherService {
-  // Cambia '10.0.2.2' por la IP de tu laptop si usas celular físico
-  final String _baseUrl = 'http://10.0.2.2:8080/api/v1/weather';
+  // Recuerda usar 'localhost' si ejecutas en Chrome. 
+  // Si llegas a probar en un celular físico, cámbialo por la IP de tu Lenovo (ej: 'http://192.168.1.X:8080...')
+  final String baseUrl = 'http://localhost:8080/api/v1/weather';
 
   Future<ClimaDTO> consultarClima(String ciudad) async {
-    final url = Uri.parse('$_baseUrl/$ciudad');
+    final urlCompleta = Uri.parse('$baseUrl/$ciudad');
     
     try {
-      final response = await http.get(url);
+      final response = await http.get(urlCompleta);
 
       if (response.statusCode == 200) {
-        // Decodifica el texto en UTF-8 para evitar problemas con acentos o la 'ñ'
-        final Map<String, dynamic> data = json.decode(utf8.decode(response.bodyBytes));
-        return ClimaDTO.fromJson(data);
+        // utf8.decode es clave para que los acentos y eñes de las ciudades no se rompan
+        final datosDecodificados = jsonDecode(utf8.decode(response.bodyBytes));
+        return ClimaDTO.fromJson(datosDecodificados);
       } else {
-        throw Exception('Error al obtener el clima: ${response.statusCode}');
+        throw Exception('No se encontraron datos para la ciudad: $ciudad');
       }
     } catch (e) {
-      throw Exception('No se pudo conectar al backend: $e');
+      throw Exception('Error de conexión con el backend de SkyWest: $e');
     }
   }
 }

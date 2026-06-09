@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'screens/main_navigation_page.dart';
+import 'screens/main_navigation_screen.dart'; // Cambiamos el import a la pantalla de navegación central
 
 void main() {
-  runApp(const SkycastApp());
+  runApp(const MyApp());
 }
 
-class SkycastApp extends StatelessWidget {
-  const SkycastApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -14,11 +14,12 @@ class SkycastApp extends StatelessWidget {
       title: 'SkyCast',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        useMaterial3: true,
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF0B0C10),
+        // Mantenemos la paleta limpia y estilizada para el diseño 'Global Connect'
+        primarySwatch: Colors.blue,
+        scaffoldBackgroundColor: const Color(0xFFF3F4F6), 
       ),
-      home: const MainNavigationPage(),
+      // Apuntamos al menú de navegación que orquesta las 4 pestañas
+      home: const MainNavigationScreen(), 
     );
   }
 }
